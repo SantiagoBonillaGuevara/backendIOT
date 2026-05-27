@@ -11,6 +11,7 @@ const mqtt = require('mqtt');
 const express = require('express');
 const fs = require('fs');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ const database = {
 const app = express();
 const PORT = process.env.PORT;
 
+app.use(cors());
 app.use(express.json());
 
 // ==================== RUTAS HTTP ====================
