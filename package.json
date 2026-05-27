@@ -1,0 +1,26 @@
+{
+  "name": "backendiot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "irrigation_backend.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SantiagoBonillaGuevara/backendIOT.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SantiagoBonillaGuevara/backendIOT/issues"
+  },
+  "homepage": "https://github.com/SantiagoBonillaGuevara/backendIOT#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mqtt": "^5.15.1"
+  }
+}

@@ -18,10 +18,10 @@ dotenv.config();
 
 const MQTT_CONFIG = {
   protocol: 'mqtts',
-  host: process.env.MQTT_HOST || 'e9ca1c748c7f4ff9ac7c088af623c0ce.s1.eu.hivemq.cloud',
-  port: parseInt(process.env.MQTT_PORT || '8883'),
-  username: process.env.MQTT_USER || 'backend',
-  password: process.env.MQTT_PASSWORD || 'teemo777#MX320',
+  host: process.env.MQTT_HOST,
+  port: parseInt(process.env.MQTT_PORT),
+  username: process.env.MQTT_USER,
+  password: process.env.MQTT_PASSWORD,
   
   // Certificado CA (si se proporciona)
   ca: process.env.CA_CERT_PATH ? 
@@ -52,7 +52,7 @@ const database = {
 // ==================== EXPRESS SERVER ====================
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 
@@ -306,39 +306,62 @@ function connectMQTT() {
   
   client.on('message', (topic, message) => {
     try {
-      const payload = JSON.parse(message.toString());
+
+      const rawMessage = message.toString();
       const timestamp = new Date().toISOString();
-      
+
       console.log(`[${timestamp}] Mensaje en ${topic}`);
-      
+
+      let payload;
+
+      // El tópico status puede venir como texto simple
+      if (topic === MQTT_TOPICS.status) {
+        payload = rawMessage;
+      } else {
+        payload = JSON.parse(rawMessage);
+      }
+
       if (topic === MQTT_TOPICS.telemetry) {
+
         // Agregar timestamp del servidor
         payload.server_received = timestamp;
+
         database.telemetry.push(payload);
-        
+
         if (database.telemetry.length > database.maxEntries) {
           database.telemetry.shift();
         }
-        
+
         console.log(`  ✓ Telemetría guardada (${database.telemetry.length} registros)`);
-        
+
       } else if (topic === MQTT_TOPICS.status) {
-        database.lastStatus = { ...payload, server_received: timestamp };
-        console.log(`  ✓ Status actualizado`);
-        
+
+        database.lastStatus = {
+          status: payload,
+          server_received: timestamp
+        };
+
+        console.log(`  ✓ Status actualizado: ${payload}`);
+
       } else if (topic === MQTT_TOPICS.alerts) {
+
         payload.server_received = timestamp;
+
         database.alerts.push(payload);
-        
+
         if (database.alerts.length > database.maxEntries) {
           database.alerts.shift();
         }
-        
+
         console.log(`  ⚠️ Alerta registrada: ${payload.alert}`);
       }
-      
+
     } catch (error) {
+
       console.error('Error al procesar mensaje:', error);
+
+      console.error('Topic:', topic);
+      console.error('Mensaje recibido:', message.toString());
     }
   });
   
